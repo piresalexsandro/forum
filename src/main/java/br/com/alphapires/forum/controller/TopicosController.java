@@ -1,8 +1,6 @@
 package br.com.alphapires.forum.controller;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,6 +8,9 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -40,29 +42,19 @@ public class TopicosController {
 	private CursoRepository cursoRepository;
 
 	@GetMapping
-	public List<TopicoDto> listaTodos(String nomeCurso) {
-
-		List<Topico> topicos = new ArrayList<Topico>();
+	public Page<TopicoDto> listaTodos(@RequestParam(required = false) String nomeCurso, @RequestParam int pagina,
+			@RequestParam int quantidadePorPagina) {
+		
+		Pageable paginacao = PageRequest.of(pagina, quantidadePorPagina);
 
 		if (Objects.isNull(nomeCurso)) {
-			topicos = topicoRepository.findAll();
+			Page<Topico> topicos = topicoRepository.findAll(paginacao);
+			return TopicoDto.converter(topicos);
 		} else {
-			topicos = topicoRepository.findByCurso_Nome(nomeCurso);
+			Page<Topico> topicos = topicoRepository.findByCurso_Nome(nomeCurso, paginacao);
+			return TopicoDto.converter(topicos);
 		}
 
-		return TopicoDto.converter(topicos);
-	}
-
-	@GetMapping("/nome/{nomeCurso}")
-	public List<TopicoDto> lista(String nomeCurso) {
-
-		List<Topico> topicos = new ArrayList<Topico>();
-
-		if (Objects.nonNull(nomeCurso)) {
-			topicos = topicoRepository.findByCurso_Nome(nomeCurso);
-		}
-
-		return TopicoDto.converter(topicos);
 	}
 
 	@PostMapping
