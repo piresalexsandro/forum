@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,17 +58,6 @@ public class TopicosController {
 		}
 	}
 
-	@PostMapping
-	@Transactional
-	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoRequest request,
-			UriComponentsBuilder uriBuilder) {
-		Topico topico = request.converter(cursoRepository);
-		topicoRepository.save(topico);
-
-		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
-		return ResponseEntity.created(uri).body(new TopicoDto(topico));
-	}
-
 	@GetMapping("/{id}")
 	public ResponseEntity<DetalhesTopicoDto> detalhar(@PathVariable("id") Long id) {
 		Optional<Topico> topico = topicoRepository.findById(id);
@@ -78,8 +68,21 @@ public class TopicosController {
 		return ResponseEntity.notFound().build();
 	}
 
+	@PostMapping
+	@Transactional
+	@CacheEvict(value = "listaDeTopicos", allEntries = true)
+	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoRequest request,
+			UriComponentsBuilder uriBuilder) {
+		Topico topico = request.converter(cursoRepository);
+		topicoRepository.save(topico);
+
+		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
+		return ResponseEntity.created(uri).body(new TopicoDto(topico));
+	}
+
 	@PutMapping("/{id}")
 	@Transactional // com esta notacao nao precisamos do .save
+	@CacheEvict(value = "listaDeTopicos", allEntries = true)
 	public ResponseEntity<TopicoDto> atualizar(@PathVariable("id") Long id,
 			@RequestBody @Valid AtualizarTopicoRequest request) {
 
@@ -97,6 +100,7 @@ public class TopicosController {
 
 	@DeleteMapping("/{id}")
 	@Transactional
+	@CacheEvict(value = "listaDeTopicos", allEntries = true)
 	public ResponseEntity remover(@PathVariable("id") Long id) {
 		Optional<Topico> optinal = topicoRepository.findById(id);
 
