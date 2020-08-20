@@ -9,9 +9,9 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,11 +43,9 @@ public class TopicosController {
 	private CursoRepository cursoRepository;
 
 	@GetMapping
-	public Page<TopicoDto> listaTodos(@RequestParam(required = false) String nomeCurso, @RequestParam int pagina,
-			@RequestParam int quantidade, @RequestParam String ordenacao) {
+	public Page<TopicoDto> listaTodos(@RequestParam(required = false) String nomeCurso, 
+			@PageableDefault(direction = Direction.DESC, sort = "id") Pageable paginacao) {
 		
-		Pageable paginacao = PageRequest.of(pagina, quantidade, Direction.DESC, ordenacao);
-
 		if (Objects.isNull(nomeCurso)) {
 			Page<Topico> topicos = topicoRepository.findAll(paginacao);
 			return TopicoDto.converter(topicos);
@@ -55,7 +53,6 @@ public class TopicosController {
 			Page<Topico> topicos = topicoRepository.findByCurso_Nome(nomeCurso, paginacao);
 			return TopicoDto.converter(topicos);
 		}
-
 	}
 
 	@PostMapping
@@ -76,7 +73,6 @@ public class TopicosController {
 		if (topico.isPresent()) {
 			return ResponseEntity.ok(new DetalhesTopicoDto(topico.get()));
 		}
-
 		return ResponseEntity.notFound().build();
 	}
 
