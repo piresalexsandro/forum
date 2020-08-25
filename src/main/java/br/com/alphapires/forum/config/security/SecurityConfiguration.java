@@ -1,8 +1,10 @@
 package br.com.alphapires.forum.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -17,6 +19,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 
 	@Autowired
 	private AutenticacaoService autenticacaoService;
+	
+	@Override
+	@Bean 
+	// a classe AuthenticationManager nao e injetada automaticamente para podermos 
+	// injeta-la com @Autowired precisamos sobreescrever o metodo authenticationManager
+	// da WebSecurityConfigurerAdapter que devolver um objeto to tipo AuthenticationManager
+	// sendo assim precisamos anotar o metodo como @Bean ou seja, com isto o spring gerancia
+	// o objeto retornado e que nos permite anota-lo com @Autowired em outra classe
+	protected AuthenticationManager authenticationManager() throws Exception {
+		return super.authenticationManager();
+	}
+	
 	
 	//Configurações de autenticação(login e controle de acesso)
 	@Override
