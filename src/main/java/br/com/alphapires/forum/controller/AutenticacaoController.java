@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.alphapires.forum.config.security.TokenService;
 import br.com.alphapires.forum.controller.request.LoginRequest;
+import br.com.alphapires.forum.dto.TokenDto;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,14 +30,14 @@ public class AutenticacaoController {
 	private TokenService tokenService;
 
 	@PostMapping
-	public ResponseEntity<?> autenticar(@RequestBody @Valid LoginRequest request){
+	public ResponseEntity<TokenDto> autenticar(@RequestBody @Valid LoginRequest request){
 		UsernamePasswordAuthenticationToken dadosLogin = request.converter();
 		
 		try {
 			Authentication authentication = authManager.authenticate(dadosLogin);
 			String token = tokenService.gerarToken(authentication);
-			System.out.println(token);
-			return ResponseEntity.ok().build();
+			
+			return ResponseEntity.ok(new TokenDto(token, "Bearer"));
 		} catch (AuthenticationException e) {
 			return ResponseEntity.badRequest().build();
 		}
