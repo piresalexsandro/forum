@@ -72,7 +72,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	// Configurações de recurso estatico(arquivos css, js, imagens, etc...)
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-
+		web.ignoring()
+        .antMatchers("/**.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
 	}
 
 //	public static void main(String[] args) {
