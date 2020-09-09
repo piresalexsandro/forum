@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import br.com.alphapires.forum.model.Topico;
 
-//@Repository
 public interface TopicoRepository extends JpaRepository<Topico, Long>{
 
 	Page<Topico> findByCurso_Nome(String nomeCurso, Pageable pageable); // usa underline para navegar entre relacionamentos

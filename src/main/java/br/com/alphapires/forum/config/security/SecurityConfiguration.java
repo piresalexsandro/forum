@@ -12,55 +12,69 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import br.com.alphapires.forum.repository.UsuarioRepository;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private AutenticacaoService autenticacaoService;
-	
+
+	@Autowired
+	private TokenService tokenService;
+
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+
 	@Override
-	@Bean 
-	// a classe AuthenticationManager nao e injetada automaticamente para podermos 
-	// injeta-la com @Autowired precisamos sobreescrever o metodo authenticationManager
-	// da WebSecurityConfigurerAdapter que devolver um objeto to tipo AuthenticationManager
-	// sendo assim precisamos anotar o metodo como @Bean ou seja, com isto o spring gerancia
+	@Bean
+	// a classe AuthenticationManager nao e injetada automaticamente para podermos
+	// injeta-la com @Autowired precisamos sobreescrever o metodo
+	// authenticationManager
+	// da WebSecurityConfigurerAdapter que devolver um objeto to tipo
+	// AuthenticationManager
+	// sendo assim precisamos anotar o metodo como @Bean ou seja, com isto o spring
+	// gerancia
 	// o objeto retornado e que nos permite anota-lo com @Autowired em outra classe
 	protected AuthenticationManager authenticationManager() throws Exception {
 		return super.authenticationManager();
 	}
-	
-	
-	//Configurações de autenticação(login e controle de acesso)
+
+	// Configurações de autenticação(login e controle de acesso)
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		//Bcrypt = criptografia de senha;
+		// Bcrypt = criptografia de senha;
 		auth.userDetailsService(autenticacaoService).passwordEncoder(new BCryptPasswordEncoder());
 	}
-	
-	//Configuraçoes de Autorização(perfil de aceesso, quem pode acessar cada url)
+
+	// Configuraçoes de Autorização(perfil de aceesso, quem pode acessar cada url)
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-		        .antMatchers(HttpMethod.GET, "/topicos").permitAll()
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/topicos").permitAll()
 				.antMatchers(HttpMethod.GET, "/topicos/*").permitAll()
 				.antMatchers(HttpMethod.POST, "/auth").permitAll()
-				.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-				//usuario autenticado ver Usuario/Perfil
+				.antMatchers(HttpMethod.GET, "/usuarios/**").permitAll()
+				.antMatchers("/h2-console/**").permitAll()
+				// usuario autenticado ver Usuario/Perfil
 				.anyRequest().authenticated()
-				//formulario de login gerado pelo spring
+				// formulario de login gerado pelo spring
 				.and().csrf().disable()
-				//metodo para dizer que nao usaremos sessao para autenticação esta serao stateless
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				// metodo para dizer que nao usaremos sessao para autenticação esta serao
+				// stateless
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.addFilterBefore(new AutenticacaoViaTokenFilter(tokenService, usuarioRepository),
+						UsernamePasswordAuthenticationFilter.class);
 	}
 
-	//Configurações de recurso estatico(arquivos css, js, imagens, etc...)
+	// Configurações de recurso estatico(arquivos css, js, imagens, etc...)
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 
 	}
-	
+
 //	public static void main(String[] args) {
 //		System.out.println(new BCryptPasswordEncoder().encode("123456"));
 //	}
