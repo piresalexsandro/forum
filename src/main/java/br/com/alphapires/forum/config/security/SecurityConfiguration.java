@@ -54,10 +54,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/topicos").permitAll()
-				.antMatchers(HttpMethod.GET, "/topicos/*").permitAll()
 				.antMatchers(HttpMethod.POST, "/auth").permitAll()
+				.antMatchers(HttpMethod.GET, "/topicos/*").permitAll()
 				.antMatchers(HttpMethod.GET, "/usuarios/**").permitAll()
+				.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 				.antMatchers("/h2-console/**").permitAll()
+				.antMatchers(HttpMethod.DELETE, "/topicos/*").hasRole("MODERADOR")
 				// usuario autenticado ver Usuario/Perfil
 				.anyRequest().authenticated()
 				// formulario de login gerado pelo spring
