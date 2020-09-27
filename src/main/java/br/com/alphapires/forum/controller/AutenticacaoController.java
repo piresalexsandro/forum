@@ -21,7 +21,7 @@ import br.com.alphapires.forum.dto.TokenDto;
 
 @RestController
 @RequestMapping("/auth")
-@Profile("prod")
+@Profile(value = {"prod", "test"})
 public class AutenticacaoController {
 	
 	@Autowired
