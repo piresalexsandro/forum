@@ -1,3 +1,4 @@
+/*
 package br.com.alphapires.forum;
 
 import org.junit.jupiter.api.Test;
@@ -14,3 +15,4 @@ class ForumApplicationTests {
 	}
 
 }
+*/
